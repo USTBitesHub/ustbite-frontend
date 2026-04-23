@@ -30,7 +30,6 @@ Thumbs.db
 # Docker itself
 Dockerfile
 .dockerignore
-nginx.conf
 
 # Docs
 *.md
