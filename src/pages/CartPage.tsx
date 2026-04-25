@@ -54,10 +54,11 @@ export default function CartPage() {
     try {
       const order = await orderService.place({
         restaurantId: restaurantId!,
+        restaurantName: restaurantName ?? "",
         items: items.map((i) => ({ menuItemId: i.menuItem.id, qty: i.qty, price: i.menuItem.price, name: i.menuItem.name })),
         floor, wing, paymentMethod: payMethod, specialInstructions: instructions,
         subtotal: sub, deliveryFee: fee, total,
-      }, restaurantName ?? "");
+      });
       clear();
       toast.success(`Order ${order.id} placed!`);
       navigate(`/orders/${order.id}`);
