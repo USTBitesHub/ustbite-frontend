@@ -3,6 +3,8 @@ import type { MenuItem } from "@/types";
 import { Button } from "@/components/ui/ust/Button";
 import { Card } from "@/components/ui/ust/Card";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
+import { useNavigate } from "react-router-dom";
 import { formatINR } from "@/utils/formatters";
 import { toast } from "sonner";
 
@@ -15,8 +17,15 @@ export const MenuItemCard = ({ item, restaurantName }: MenuItemCardProps) => {
   const qty = useCartStore((s) => s.qtyOf(item.id));
   const add = useCartStore((s) => s.add);
   const decrement = useCartStore((s) => s.decrement);
+  const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
 
   const handleAdd = () => {
+    if (!user) {
+      toast.error("Please sign in to add items to your cart");
+      navigate("/login");
+      return;
+    }
     add(item, restaurantName);
     toast.success(`${item.name} added to cart`);
   };
