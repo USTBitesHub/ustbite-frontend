@@ -101,16 +101,23 @@ export interface User {
 
 export interface AuthCredentials {
   email: string;
-  password: string;
+  employee_id: string;  // USTBite uses employee ID, not password
 }
 
 export interface RegisterPayload {
-  fullName: string;
-  employeeId: string;
+  name: string;          // maps to User.name in backend
+  employee_id: string;
   email: string;
-  department: string;
-  floor: string;
-  password: string;
+  department?: string;
+  floor_number?: string;
+  phone?: string;
+}
+
+// Generic wrapper matching backend StandardResponse format
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+  status: string;
 }
 
 export interface PlaceOrderPayload {

@@ -1,14 +1,14 @@
 import { apiClient } from "./apiClient";
-import type { User } from "@/types";
+import type { User, ApiResponse } from "@/types";
 
 export const userService = {
-  me: async () => {
-    const res = await apiClient.get<User>("/users/me");
-    return res.data;
+  me: async (): Promise<User> => {
+    const res = await apiClient.get<ApiResponse<User>>("/users/me");
+    return res.data.data;
   },
 
-  update: async (patch: Partial<User>) => {
-    const res = await apiClient.put<User>("/users/me", patch);
-    return res.data;
+  update: async (patch: Partial<User>): Promise<User> => {
+    const res = await apiClient.put<ApiResponse<User>>("/users/me", patch);
+    return res.data.data;
   },
 };
