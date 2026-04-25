@@ -48,12 +48,15 @@ export interface CartItem {
 }
 
 export type OrderStatus =
+  | "PENDING"
   | "PLACED"
   | "CONFIRMED"
   | "PREPARING"
+  | "READY"
   | "OUT_FOR_DELIVERY"
   | "DELIVERED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "PAYMENT_FAILED";
 
 export interface OrderItemSummary {
   name: string;
@@ -122,6 +125,7 @@ export interface ApiResponse<T> {
 
 export interface PlaceOrderPayload {
   restaurantId: string;
+  restaurantName: string;         // used as restaurant_name_snapshot in backend
   items: { menuItemId: string; qty: number; price: number; name: string }[];
   floor: string;
   wing: string;
