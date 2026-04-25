@@ -28,6 +28,13 @@ export default function CartPage() {
   const [payMethod, setPayMethod] = useState<PayMethod>("UPI");
   const [placing, setPlacing] = useState(false);
 
+  // Redirect to login if not authenticated
+  if (!user) {
+    toast.error("Please sign in to view your cart");
+    navigate("/login");
+    return null;
+  }
+
   const sub = subtotal();
   const fee = 0;
   const total = sub + fee;
