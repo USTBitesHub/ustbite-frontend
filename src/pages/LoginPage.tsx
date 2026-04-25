@@ -68,16 +68,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="my-5 flex items-center gap-3">
-            <div className="flex-1 h-px bg-border-soft" />
-            <span className="text-xs text-text-secondary uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-border-soft" />
-          </div>
-
-          <Button variant="outline" className="w-full" onClick={() => toast.info("Google SSO is coming soon for UST accounts")}>
-            <GoogleIcon /> Continue with Google
-          </Button>
-
           <p className="mt-6 text-center text-sm text-text-secondary">
             New to USTBite?{" "}
             <Link to="/register" className="text-accent-red font-semibold hover:underline">Create an account</Link>

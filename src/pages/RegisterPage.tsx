@@ -38,12 +38,12 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       const user = await authService.register({
-        fullName: form.fullName,
-        employeeId: form.employeeId,
+        name: form.fullName,
+        employee_id: form.employeeId,
         email: form.email,
-        department: form.department,
-        floor: form.floor,
         password: form.password,
+        department: form.department,
+        floor_number: form.floor,
       });
       setUser(user);
       toast.success("Account created. Welcome to USTBite!");
@@ -101,16 +101,6 @@ export default function RegisterPage() {
               {submitting ? "Creating account..." : "Create account"}
             </Button>
           </form>
-
-          <div className="my-5 flex items-center gap-3">
-            <div className="flex-1 h-px bg-border-soft" />
-            <span className="text-xs text-text-secondary uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-border-soft" />
-          </div>
-
-          <Button variant="outline" className="w-full" onClick={() => toast.info("Google SSO is coming soon for UST accounts")}>
-            Continue with Google
-          </Button>
 
           <p className="mt-6 text-center text-sm text-text-secondary">
             Already have an account?{" "}

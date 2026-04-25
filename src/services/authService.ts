@@ -1,22 +1,36 @@
 import { apiClient } from "./apiClient";
 import type { User } from "@/types";
 
+// Map backend snake_case → frontend camelCase User type
+function toUser(raw: Record<string, unknown>): User {
+  return {
+    id:          raw.id as string,
+    fullName:    (raw.name as string) ?? "",
+    email:       raw.email as string,
+    employeeId:  (raw.employee_id as string) ?? "",
+    department:  (raw.department as string) ?? "",
+    floor:       (raw.floor_number as string) ?? "",
+    phone:       raw.phone as string | undefined,
+  };
+}
+
 interface AuthCredentials {
   email: string;
-  employee_id: string;
+  password: string;
 }
 
 interface RegisterPayload {
   email: string;
   employee_id: string;
   name: string;
+  password: string;
   phone?: string;
   department?: string;
   floor_number?: string;
 }
 
 interface AuthResponse {
-  data: { token: string; user: User };
+  data: { token: string; user: Record<string, unknown> };
   message: string;
   status: string;
 }
@@ -35,14 +49,14 @@ export const authService = {
     const res = await apiClient.post<AuthResponse>("/auth/login", credentials);
     const { token, user } = res.data.data;
     setAuthCookie(token);
-    return user;
+    return toUser(user);
   },
 
   register: async (payload: RegisterPayload): Promise<User> => {
     const res = await apiClient.post<AuthResponse>("/auth/register", payload);
     const { token, user } = res.data.data;
     setAuthCookie(token);
-    return user;
+    return toUser(user);
   },
 
   logout: async (): Promise<void> => {
