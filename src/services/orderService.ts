@@ -1,5 +1,5 @@
 import { apiClient } from "./apiClient";
-import type { Order, PlaceOrderPayload, ApiResponse } from "@/types";
+import type { Order, PlaceOrderPayload, ApiResponse, PaymentInfo } from "@/types";
 
 // ─── Frontend → Backend payload transformer ───────────────────────────────────
 
@@ -33,6 +33,18 @@ function toBackendOrder(payload: PlaceOrderPayload): Record<string, unknown> {
 // ─── Backend → Frontend response transformer ─────────────────────────────────
 
 function toOrder(raw: Record<string, unknown>): Order {
+  const createdAt = (raw.created_at as string | null) ?? undefined;
+  // Add ~20 min for estimated delivery when no update has occurred
+  let estimatedDelivery: string | undefined;
+  if (raw.updated_at) {
+    estimatedDelivery = raw.updated_at as string;
+  } else if (createdAt) {
+    const d = new Date(createdAt);
+    if (!isNaN(d.getTime())) {
+      d.setMinutes(d.getMinutes() + 20);
+      estimatedDelivery = d.toISOString();
+    }
+  }
   return {
     id:                  raw.id as string,
     restaurantId:        raw.restaurant_id as string,
@@ -46,24 +58,38 @@ function toOrder(raw: Record<string, unknown>): Order {
     deliveryFee:         0,
     total:               parseFloat(String(raw.total_amount ?? 0)),
     status:              raw.status as Order["status"],
-    placedAt:            raw.created_at as string,
-    estimatedDelivery:   raw.updated_at as string ?? raw.created_at as string,
+    placedAt:            createdAt ?? "",
+    estimatedDelivery:   estimatedDelivery ?? "",
     floor:               (raw.delivery_floor as string) ?? "",
     wing:                (raw.delivery_wing as string) ?? "",
-    paymentMethod:       "UPI",  // backend doesn't return this in OrderResponse
+    paymentMethod:       "UPI",
     specialInstructions: raw.special_instructions as string | undefined,
   };
 }
 
 // ─── Service calls ────────────────────────────────────────────────────────────
 
+export interface PlaceOrderResult {
+  order: Order;
+  paymentInfo: PaymentInfo | null;
+}
+
 export const orderService = {
-  place: async (payload: PlaceOrderPayload): Promise<Order> => {
+  place: async (payload: PlaceOrderPayload): Promise<PlaceOrderResult> => {
     const res = await apiClient.post<ApiResponse<Record<string, unknown>>>(
       "/orders",
       toBackendOrder(payload)
     );
-    return toOrder(res.data.data);
+    const raw = res.data.data;
+    const pi = raw.payment_info as Record<string, unknown> | undefined;
+    const paymentInfo: PaymentInfo | null = pi?.razorpay_order_id
+      ? {
+          paymentId:       pi.payment_id as string,
+          razorpayOrderId: pi.razorpay_order_id as string,
+          razorpayKeyId:   pi.razorpay_key_id as string,
+        }
+      : null;
+    return { order: toOrder(raw), paymentInfo };
   },
 
   getById: async (id: string): Promise<Order> => {

@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/ust/EmptyState";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { orderService } from "@/services/orderService";
+import { openRazorpayCheckout, paymentService } from "@/services/paymentService";
 import { formatINR } from "@/utils/formatters";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -59,19 +60,52 @@ export default function CartPage() {
     if (!floor) { toast.error("Please enter your floor number"); return; }
     setPlacing(true);
     try {
-      const order = await orderService.place({
+      const { order, paymentInfo } = await orderService.place({
         restaurantId: restaurantId!,
         restaurantName: restaurantName ?? "",
         items: items.map((i) => ({ menuItemId: i.menuItem.id, qty: i.qty, price: i.menuItem.price, name: i.menuItem.name })),
         floor, wing, paymentMethod: payMethod, specialInstructions: instructions,
         subtotal: sub, deliveryFee: fee, total,
       });
-      clear();
-      toast.success(`Order ${order.id} placed!`);
-      navigate(`/orders/${order.id}`);
+
+      // Cash on Delivery — no payment popup needed
+      if (payMethod === "Cash on Delivery" || !paymentInfo?.razorpayOrderId) {
+        clear();
+        toast.success("Order placed successfully!");
+        navigate(`/orders/${order.id}`);
+        return;
+      }
+
+      // UPI / Card — open Razorpay checkout
+      setPlacing(false); // release the button while popup is open
+      await openRazorpayCheckout({
+        razorpayKeyId:   paymentInfo.razorpayKeyId,
+        razorpayOrderId: paymentInfo.razorpayOrderId,
+        amountPaise:     Math.round(total * 100),
+        userName:        user.fullName,
+        userEmail:       user.email,
+        onSuccess: async (response) => {
+          try {
+            await paymentService.verify({
+              razorpay_order_id:  response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature:  response.razorpay_signature,
+            });
+            clear();
+            toast.success("Payment successful! Order confirmed.");
+          } catch {
+            toast.error("Payment received but verification failed. Contact support.");
+          } finally {
+            navigate(`/orders/${order.id}`);
+          }
+        },
+        onDismiss: () => {
+          toast.error("Payment cancelled. Your order is saved — you can retry from order history.");
+          navigate(`/orders/${order.id}`);
+        },
+      });
     } catch {
       toast.error("Could not place order. Please try again.");
-    } finally {
       setPlacing(false);
     }
   };

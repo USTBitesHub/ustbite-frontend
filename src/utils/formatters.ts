@@ -11,13 +11,17 @@ export const formatRelativeTime = (iso: string): string => {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 };
 
-export const formatDateTime = (iso: string): string =>
-  new Date(iso).toLocaleString("en-IN", {
+export const formatDateTime = (iso: string | null | undefined): string => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleString("en-IN", {
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
   });
+};
 
 export const initials = (name: string): string =>
   name

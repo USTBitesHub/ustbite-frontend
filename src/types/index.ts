@@ -123,6 +123,12 @@ export interface ApiResponse<T> {
   status: string;
 }
 
+export interface PaymentInfo {
+  paymentId: string;
+  razorpayOrderId: string;
+  razorpayKeyId: string;
+}
+
 export interface PlaceOrderPayload {
   restaurantId: string;
   restaurantName: string;         // used as restaurant_name_snapshot in backend
