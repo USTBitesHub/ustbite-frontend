@@ -20,6 +20,14 @@ interface Message {
   loading?: boolean;
 }
 
+const uuid = () =>
+  typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
+
 const SUGGESTIONS = [
   "Show me South Indian restaurants",
   "What's in my cart?",
@@ -28,7 +36,7 @@ const SUGGESTIONS = [
   "Find veg options under ₹150",
 ];
 
-let sessionId = crypto.randomUUID();
+let sessionId = uuid();
 
 /* ── component ───────────────────────────────────────────────────── */
 export default function AiAssistantPage() {
@@ -61,7 +69,7 @@ export default function AiAssistantPage() {
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
 
-    const userMsg: Message = { id: crypto.randomUUID(), role: "user", text };
+    const userMsg: Message = { id: uuid(), role: "user", text };
     const loadingMsg: Message = { id: "loading", role: "assistant", text: "", loading: true };
 
     setMessages((prev) => [...prev, userMsg, loadingMsg]);
@@ -73,7 +81,7 @@ export default function AiAssistantPage() {
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== "loading"),
         {
-          id: crypto.randomUUID(),
+          id: uuid(),
           role: "assistant",
           text: res.response,
           toolCalls: res.tool_calls_made.length ? res.tool_calls_made : undefined,
