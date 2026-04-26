@@ -15,6 +15,7 @@ const OrderHistoryPage = lazy(() => import("./pages/OrderHistoryPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const AiAssistantPage = lazy(() => import("./pages/AiAssistantPage"));
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/orders/:id" element={<OrderTrackingPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/assistant" element={<AiAssistantPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>

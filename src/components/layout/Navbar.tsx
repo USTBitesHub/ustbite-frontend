@@ -1,6 +1,6 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X, ShoppingCart, User as UserIcon } from "lucide-react";
+import { Menu, X, ShoppingCart, User as UserIcon, Sparkles } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/ust/Button";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,20 @@ export const Navbar = () => {
                 {link.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/assistant"
+              className={({ isActive }) =>
+                cn(
+                  "px-3.5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+                  isActive
+                    ? "text-brand-amber bg-brand-amber-soft"
+                    : "text-text-secondary hover:text-brand-amber hover:bg-brand-amber-soft",
+                )
+              }
+            >
+              <Sparkles className="size-3.5" />
+              AI Order
+            </NavLink>
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
@@ -111,6 +125,9 @@ export const Navbar = () => {
             ))}
             <Link to="/cart" onClick={() => setOpen(false)} className="block px-3 py-2.5 rounded-md text-sm font-medium text-text-secondary hover:bg-surface-soft">
               Cart {itemCount > 0 && <span className="ml-1 text-accent-red font-semibold">({itemCount})</span>}
+            </Link>
+            <Link to="/assistant" onClick={() => setOpen(false)} className="flex items-center gap-1.5 px-3 py-2.5 rounded-md text-sm font-medium text-text-secondary hover:bg-brand-amber-soft hover:text-brand-amber">
+              <Sparkles className="size-3.5" /> AI Order
             </Link>
             <div className="border-t border-border-soft pt-3 mt-2 flex gap-2 px-1">
               {isAuthenticated ? (
