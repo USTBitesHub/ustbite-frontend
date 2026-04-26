@@ -89,8 +89,14 @@ export default function AiAssistantPage() {
       ]);
     } catch (err: unknown) {
       setMessages((prev) => prev.filter((m) => m.id !== "loading"));
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      toast.error(detail || "Agent unavailable. Please try again.");
+      const axiosErr = err as { response?: { status?: number; data?: { detail?: string } } };
+      const status = axiosErr?.response?.status;
+      const detail = axiosErr?.response?.data?.detail;
+      if (status === 429) {
+        toast.warning(detail || "AI is busy — please wait a moment and try again.");
+      } else {
+        toast.error(detail || "Agent unavailable. Please try again.");
+      }
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 50);
