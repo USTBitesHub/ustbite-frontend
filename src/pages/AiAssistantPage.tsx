@@ -70,7 +70,7 @@ export default function AiAssistantPage() {
     if (!text.trim() || loading) return;
 
     const userMsg: Message = { id: uuid(), role: "user", text };
-    const loadingMsg: Message = { id: "loading", role: "assistant", text: "", loading: true };
+    const loadingMsg: Message = { id: "loading", role: "assistant", text: "Thinking… this may take up to a minute on our free-tier AI 🤖", loading: true };
 
     setMessages((prev) => [...prev, userMsg, loadingMsg]);
     setInput("");
@@ -200,9 +200,20 @@ function MessageBubble({ msg }: { msg: Message }) {
       {/* Bubble */}
       <div className={cn("flex flex-col gap-1.5 max-w-[80%]", isUser && "items-end")}>
         {msg.loading ? (
-          <div className="px-4 py-3 rounded-2xl bg-surface-soft border border-border-soft flex items-center gap-2">
-            <Loader2 className="size-4 animate-spin text-brand-amber" />
-            <span className="text-sm text-text-secondary">Thinking…</span>
+          <div className="px-4 py-3 rounded-2xl bg-surface-soft border border-border-soft flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <Loader2 className="size-4 animate-spin text-brand-amber flex-shrink-0" />
+              <span className="text-sm text-text-secondary">{msg.text || "Thinking…"}</span>
+            </div>
+            <div className="flex gap-1 pl-6">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="size-1.5 rounded-full bg-brand-amber animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div
