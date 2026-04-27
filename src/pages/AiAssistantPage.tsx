@@ -3,8 +3,10 @@ import { Send, Bot, User, Loader2, Sparkles, ChevronDown } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Button } from "@/components/ui/ust/Button";
 import { agentService } from "@/services/agentService";
+import { cartService } from "@/services/cartService";
 import type { ToolCallInfo } from "@/services/agentService";
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,7 @@ let sessionId = uuid();
 export default function AiAssistantPage() {
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  const setFromServer = useCartStore((s) => s.setFromServer);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -87,6 +90,10 @@ export default function AiAssistantPage() {
           toolCalls: res.tool_calls_made.length ? res.tool_calls_made : undefined,
         },
       ]);
+
+      if (res.tool_calls_made?.some((tc) => tc.tool === "add_to_cart")) {
+        cartService.get().then((items) => setFromServer(items)).catch(() => {});
+      }
     } catch (err: unknown) {
       setMessages((prev) => prev.filter((m) => m.id !== "loading"));
       const axiosErr = err as { response?: { status?: number; data?: { detail?: string } } };

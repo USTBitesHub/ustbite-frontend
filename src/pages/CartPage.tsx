@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/ust/EmptyState";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { orderService } from "@/services/orderService";
+import { cartService } from "@/services/cartService";
 import { openRazorpayCheckout, paymentService } from "@/services/paymentService";
 import { formatINR } from "@/utils/formatters";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,7 @@ type PayMethod = Order["paymentMethod"];
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { items, restaurantId, restaurantName, subtotal, add, decrement, remove, clear } = useCartStore();
+  const { items, restaurantId, restaurantName, subtotal, add, decrement, remove, clear, setFromServer } = useCartStore();
   const user = useAuthStore((s) => s.user);
 
   const [floor, setFloor] = useState(user?.floor ?? "");
@@ -28,6 +29,20 @@ export default function CartPage() {
   const [instructions, setInstructions] = useState("");
   const [payMethod, setPayMethod] = useState<PayMethod>("UPI");
   const [placing, setPlacing] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    cartService
+      .get()
+      .then((serverItems) => {
+        if (active) setFromServer(serverItems);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [user, setFromServer]);
 
   // Redirect to login if not authenticated
   if (!user) {
