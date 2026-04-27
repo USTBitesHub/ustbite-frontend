@@ -13,10 +13,16 @@ export interface ChatResponse {
 
 export const agentService = {
   chat: async (message: string, sessionId: string): Promise<ChatResponse> => {
-    const res = await apiClient.post<ChatResponse>("/agent/chat", {
-      message,
-      session_id: sessionId,
-    });
+    const res = await apiClient.post<ChatResponse>(
+      "/agent/chat",
+      {
+        message,
+        session_id: sessionId,
+      },
+      {
+        timeout: 120000,
+      },
+    );
     return res.data;
   },
 };
