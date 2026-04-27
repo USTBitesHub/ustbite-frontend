@@ -10,6 +10,7 @@ interface CartState {
   remove: (menuItemId: string) => void;
   decrement: (menuItemId: string) => void;
   clear: () => void;
+  setFromServer: (items: CartItem[]) => void;
   itemCount: () => number;
   subtotal: () => number;
   qtyOf: (menuItemId: string) => number;
@@ -72,6 +73,12 @@ export const useCartStore = create<CartState>()(
       },
 
       clear: () => set({ items: [], restaurantId: null, restaurantName: null }),
+
+      setFromServer: (items) => set({
+        items,
+        restaurantId: items[0]?.menuItem.restaurantId ?? null,
+        restaurantName: items[0]?.restaurantName ?? null,
+      }),
 
       itemCount: () => get().items.reduce((n, i) => n + i.qty, 0),
       subtotal: () => get().items.reduce((n, i) => n + i.qty * i.menuItem.price, 0),

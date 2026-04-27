@@ -24,6 +24,7 @@ export default function CartPage() {
   const { items, restaurantId, restaurantName, subtotal, add, decrement, remove, clear, setFromServer } = useCartStore();
   const user = useAuthStore((s) => s.user);
 
+  const [hydrated, setHydrated] = useState(false);
   const [floor, setFloor] = useState(user?.floor ?? "");
   const [wing, setWing] = useState(user?.wing ?? "A");
   const [instructions, setInstructions] = useState("");
@@ -31,7 +32,16 @@ export default function CartPage() {
   const [placing, setPlacing] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!user) {
+      toast.error("Please sign in to view your cart");
+      navigate("/login");
+      return;
+    }
     let active = true;
     cartService
       .get()
@@ -42,14 +52,9 @@ export default function CartPage() {
     return () => {
       active = false;
     };
-  }, [user, setFromServer]);
+  }, [hydrated, user, navigate, setFromServer]);
 
-  // Redirect to login if not authenticated
-  if (!user) {
-    toast.error("Please sign in to view your cart");
-    navigate("/login");
-    return null;
-  }
+  if (!hydrated) return null;
 
   const sub = subtotal();
   const fee = 0;
