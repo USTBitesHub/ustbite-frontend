@@ -4,7 +4,7 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Button } from "@/components/ui/ust/Button";
 import { agentService } from "@/services/agentService";
 import { cartService } from "@/services/cartService";
-import type { ToolCallInfo } from "@/services/agentService";
+import type { ToolCallInfo, HistoryMessage } from "@/services/agentService";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { useNavigate } from "react-router-dom";
@@ -80,7 +80,11 @@ export default function AiAssistantPage() {
     setLoading(true);
 
     try {
-      const res = await agentService.chat(text, sessionId);
+      const history: HistoryMessage[] = messages
+        .filter((m) => !m.loading && m.id !== "welcome")
+        .map((m) => ({ role: m.role, content: m.text }));
+
+      const res = await agentService.chat(text, sessionId, history);
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== "loading"),
         {
