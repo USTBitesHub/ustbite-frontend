@@ -49,7 +49,7 @@ export const MenuItemCard = ({ item, restaurantName }: MenuItemCardProps) => {
       </div>
       <div className="shrink-0 flex flex-col items-end gap-2">
         <div className="size-20 sm:size-24 rounded-md overflow-hidden bg-surface-soft">
-          <img src={item.image} alt={item.name} loading="lazy" className="size-full object-cover" />
+          <img src={item.image} alt={item.name} loading="lazy" className="size-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
         </div>
         {qty > 0 ? (
           <div className="flex items-center gap-1.5 bg-brand-amber rounded-md text-brand-navy px-1 h-9">

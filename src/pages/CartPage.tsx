@@ -46,7 +46,7 @@ export default function CartPage() {
     cartService
       .get()
       .then((serverItems) => {
-        if (active) setFromServer(serverItems);
+        if (active && serverItems.length > 0) setFromServer(serverItems);
       })
       .catch(() => {});
     return () => {

@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ShoppingBag, Plus, Minus, Trash2 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { cartService } from "@/services/cartService";
 import { Button } from "@/components/ui/ust/Button";
 import { Card } from "@/components/ui/ust/Card";
 import { formatINR } from "@/utils/formatters";
@@ -11,6 +12,15 @@ interface CartPanelProps {
 
 export const CartPanel = ({ variant = "sidebar" }: CartPanelProps) => {
   const { items, restaurantName, subtotal, itemCount, add, decrement, remove } = useCartStore();
+  const navigate = useNavigate();
+
+  const handleCheckout = async () => {
+    try {
+      await cartService.sync(items);
+    } catch {
+    }
+    navigate("/cart");
+  };
   const total = subtotal();
   const count = itemCount();
 
@@ -68,8 +78,8 @@ export const CartPanel = ({ variant = "sidebar" }: CartPanelProps) => {
           <span className="text-sm text-text-secondary">Subtotal</span>
           <span className="text-base font-bold text-foreground">{formatINR(total)}</span>
         </div>
-        <Button asChild variant="amber" className="w-full">
-          <Link to="/cart">Proceed to checkout</Link>
+        <Button variant="amber" className="w-full" onClick={handleCheckout}>
+          Proceed to checkout
         </Button>
       </div>
     </Card>

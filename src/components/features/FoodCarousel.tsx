@@ -67,7 +67,7 @@ export const FoodCarousel = ({ items, className, initialActive = 1 }: FoodCarous
               style={{ height: "14rem" }}
             >
               <Link to={`/restaurants/${restaurantId}`} className="block size-full">
-                <img src={item.image} alt={item.name} className="size-full object-cover" loading="lazy" />
+                <img src={item.image} alt={item.name} className="size-full object-cover" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/80 via-brand-navy/20 to-transparent" />
                 <div className="absolute bottom-3 left-3 right-3 text-white">
                   <div className="flex items-end justify-between gap-2">
