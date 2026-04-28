@@ -56,6 +56,7 @@ export default function AiAssistantPage() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingRef = useRef<string>("");
 
   useEffect(() => {
     document.title = "USTBite — AI Assistant";
@@ -70,7 +71,13 @@ export default function AiAssistantPage() {
   }, [messages]);
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() || loading) return;
+    if (!text.trim()) return;
+
+    if (loading) {
+      pendingRef.current = text;
+      setInput("");
+      return;
+    }
 
     const userMsg: Message = { id: uuid(), role: "user", text };
     const loadingMsg: Message = { id: "loading", role: "assistant", text: "Thinking… this may take up to a minute on our free-tier AI 🤖", loading: true };
@@ -91,7 +98,7 @@ export default function AiAssistantPage() {
           id: uuid(),
           role: "assistant",
           text: res.response,
-          toolCalls: res.tool_calls_made.length ? res.tool_calls_made : undefined,
+          toolCalls: res.tool_calls_made?.length ? res.tool_calls_made : undefined,
         },
       ]);
 
@@ -110,7 +117,13 @@ export default function AiAssistantPage() {
       }
     } finally {
       setLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const pending = pendingRef.current;
+      pendingRef.current = "";
+      if (pending) {
+        sendMessage(pending);
+      } else {
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
     }
   };
 
@@ -154,7 +167,8 @@ export default function AiAssistantPage() {
               <button
                 key={s}
                 onClick={() => sendMessage(s)}
-                className="px-3 py-1.5 rounded-full border border-border-soft text-xs text-text-secondary bg-surface-soft hover:bg-brand-amber-soft hover:border-brand-amber hover:text-brand-navy transition-colors"
+                disabled={loading}
+                className="px-3 py-1.5 rounded-full border border-border-soft text-xs text-text-secondary bg-surface-soft hover:bg-brand-amber-soft hover:border-brand-amber hover:text-brand-navy transition-colors disabled:opacity-50"
               >
                 {s}
               </button>
@@ -171,8 +185,7 @@ export default function AiAssistantPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
               placeholder="e.g. Add 2 masala dosas from Annapoorna…"
-              disabled={loading}
-              className="flex-1 px-4 py-2.5 rounded-lg border border-border-soft bg-surface-soft text-sm text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-brand-amber focus:border-transparent disabled:opacity-50 transition"
+              className="flex-1 px-4 py-2.5 rounded-lg border border-border-soft bg-surface-soft text-sm text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-brand-amber focus:border-transparent transition"
             />
             <Button
               variant="amber"

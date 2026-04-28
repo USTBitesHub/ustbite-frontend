@@ -25,6 +25,10 @@ export default function CartPage() {
   const user = useAuthStore((s) => s.user);
 
   const [hydrated, setHydrated] = useState(false);
+
+  const syncCartToServer = () => {
+    cartService.sync(useCartStore.getState().items).catch(() => {});
+  };
   const [floor, setFloor] = useState(user?.floor ?? "");
   const [wing, setWing] = useState(user?.wing ?? "A");
   const [instructions, setInstructions] = useState("");
@@ -149,12 +153,12 @@ export default function CartPage() {
                   <p className="text-sm text-text-secondary">{formatINR(menuItem.price)} each</p>
                 </div>
                 <div className="flex items-center gap-1 bg-surface-soft rounded-md h-9">
-                  <button onClick={() => decrement(menuItem.id)} className="px-2 hover:bg-border-soft rounded-l-md h-full" aria-label="Decrease"><Minus className="size-4" /></button>
+                  <button onClick={() => { decrement(menuItem.id); syncCartToServer(); }} className="px-2 hover:bg-border-soft rounded-l-md h-full" aria-label="Decrease"><Minus className="size-4" /></button>
                   <span className="text-sm font-bold w-7 text-center">{qty}</span>
-                  <button onClick={() => add(menuItem, restaurantName ?? "")} className="px-2 hover:bg-border-soft rounded-r-md h-full" aria-label="Increase"><Plus className="size-4" /></button>
+                  <button onClick={() => { add(menuItem, restaurantName ?? ""); syncCartToServer(); }} className="px-2 hover:bg-border-soft rounded-r-md h-full" aria-label="Increase"><Plus className="size-4" /></button>
                 </div>
                 <p className="font-semibold text-foreground w-20 text-right">{formatINR(menuItem.price * qty)}</p>
-                <button onClick={() => remove(menuItem.id)} className="text-text-secondary hover:text-accent-red" aria-label="Remove"><Trash2 className="size-4" /></button>
+                <button onClick={() => { remove(menuItem.id); syncCartToServer(); }} className="text-text-secondary hover:text-accent-red" aria-label="Remove"><Trash2 className="size-4" /></button>
               </Card>
             ))}
           </div>
